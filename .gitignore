@@ -1,0 +1,5 @@
+conv-cnmp/
+wandb/
+__pycache__
+
+trained_cnmp*.pth
