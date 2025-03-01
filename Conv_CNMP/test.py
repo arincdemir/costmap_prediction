@@ -3,7 +3,7 @@ import torch
 import time
 from torch.utils.data import DataLoader, random_split
 import torch.optim as optim
-from CNMP import CNMP  # see [CNMP_only/CNMP.py]
+from CNN_CNMP import CNN_CNMP
 from dataset import GridDataset  # see [CNMP_only/dataset.py]
 
 
@@ -27,7 +27,7 @@ dataset = GridDataset(grids_tensor, 2, 2)
 
 train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-model = CNMP(
+model = CNN_CNMP(
     t_dim=t_dim,
     SM_dim=SM_dim,
     encoder_hidden_dims=encoder_hidden_dims,

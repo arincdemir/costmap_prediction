@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from CNMP import CNMP
+from Conv_CNMP.CNN_CNMP import CNMP
 
 # Define dimensions
 t_dim = 10
