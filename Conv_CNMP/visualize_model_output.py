@@ -1,8 +1,9 @@
 import os
 import torch
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as np
-from CNMP import CNMP
+from CNN_CNMP import CNN_CNMP
 
 # Hyperparameters (must match training)
 grid_size = 32
@@ -10,21 +11,25 @@ max_encodings = 5  # as used in the model and dataset
 max_queries = 5    # new parameter for querying
 
 # Hyperparameters
-t_dim = 1                   # step index dimension
-SM_dim = 32 ** 2            # grid flattened dimension (16*16)
-encoder_hidden_dims = [1024, 1024, 1024]
-latent_dim = 1024
-decoder_hidden_dims = [1024, 1024, 1024]
+t_dim = 1                      # step index dimension
+grid_size = 32                 # grid size (32x32)
 
-# Load the trained model
-model = CNMP(
+cnn_channels = [32, 64, 128]  # Stronger CNN feature extraction
+encoder_hidden_dims = [512, 256, 128]  # Gradually decrease dimensions
+latent_dim = 128  # More compact representation 
+decoder_hidden_dims = [128, 256, 512]  # Mirror encoder but reversed
+
+
+# Initialize the CNN_CNMP model
+model = CNN_CNMP(
     t_dim=t_dim,
-    SM_dim=SM_dim,
+    grid_size=grid_size,
     encoder_hidden_dims=encoder_hidden_dims,
     decoder_hidden_dims=decoder_hidden_dims,
-    latent_dim=latent_dim
+    latent_dim=latent_dim,
+    cnn_channels=cnn_channels
 )
-model_path = os.path.join(os.path.dirname(__file__), "trained_cnmp_best.pth")
+model_path = os.path.join(os.path.dirname(__file__), "trained_model_best.pth")
 model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 model.eval()
 
@@ -32,79 +37,89 @@ model.eval()
 data_path = os.path.join(os.path.dirname(__file__), "grids_tensor.pt")
 all_grids_tensor = torch.load(data_path, map_location=torch.device("cpu"))
 
-# Pick one simulation sample (here sample index 0)
+# Pick one simulation sample (here using the last simulation)
 simulation = all_grids_tensor[-1]  # shape: (steps, grid_size, grid_size)
 steps = simulation.shape[0]
 
-# Use the first 5 steps as encoding and query the next 5 steps
+# Set encoding and query lengths
 num_encoding = 5
 num_query = 5
-flat_size = SM_dim + 1  # 1 for the step index + flattened grid
 
-# Create padded encoding inputs and mask
-padded_inputs = torch.zeros(max_encodings, flat_size, dtype=torch.float32)
-mask = torch.zeros(max_encodings, dtype=torch.bool)
+# Prepare encoding inputs: separate time indices and grids and create mask
+padded_time_indices = torch.zeros(max_encodings, 1, dtype=torch.float32)
+padded_grids = torch.zeros(max_encodings, grid_size, grid_size, dtype=torch.float32)
+encodings_mask = torch.zeros(max_encodings, dtype=torch.bool)
 
 for i in range(num_encoding):
-    grid = simulation[i]           # shape: (grid_size, grid_size)
-    flat = grid.flatten()          # shape: (SM_dim,)
-    index_tensor = torch.tensor([i], dtype=torch.float32) / steps
-    padded_inputs[i] = torch.cat((index_tensor, flat))
-    mask[i] = True
+    # Normalize time index using total steps
+    padded_time_indices[i, 0] = float(i) / steps
+    padded_grids[i] = simulation[i]
+    encodings_mask[i] = True
 
 # Prepare query inputs: time steps from num_encoding to num_encoding+num_query-1
 query_steps = list(range(num_encoding, num_encoding + num_query))
-padded_query_indices = torch.tensor(query_steps, dtype=torch.float32).unsqueeze(1) / steps  # shape: (num_query, 1)
-query_mask = torch.ones(num_query, dtype=torch.bool)
+padded_query_indices = (torch.tensor(query_steps, dtype=torch.float32).unsqueeze(1) / steps)  # shape: (num_query, 1)
+queries_mask = torch.ones(num_query, dtype=torch.bool)
 
-#print(padded_inputs, mask, padded_query_indices)
-
-# Query the model for the next 5 time steps at once
+# Query the model for the next steps using the CNN_CNMP forward interface
 with torch.no_grad():
-    # Add batch dimension; model expects (batch, max_encodings, feature) for encodings and similar for queries
-    output = model(padded_inputs.unsqueeze(0),
-                   mask.unsqueeze(0),
-                   padded_query_indices.unsqueeze(0),
-                   query_mask.unsqueeze(0))
-    
-# Output shape: (1, num_query, SM_dim*2); extract the first SM_dim as mean prediction and reshape
+    # Adding batch dimension for each input
+    output = model(
+        padded_time_indices.unsqueeze(0),  # (1, max_encodings, t_dim)
+        padded_grids.unsqueeze(0),         # (1, max_encodings, grid_size, grid_size)
+        encodings_mask.unsqueeze(0),       # (1, max_encodings)
+        padded_query_indices.unsqueeze(0), # (1, num_query, t_dim)
+        queries_mask.unsqueeze(0)          # (1, num_query)
+    )
+
+# Output shape: (1, num_query, grid_size**2 *2); extract the first part as mean prediction and reshape
 predicted_grids = []
-standard_deviations = []
 for i in range(num_query):
-    pred_flat = output[0, i, :SM_dim]
+    pred_flat = output[0, i, :grid_size ** 2]
+    pred_flat = torch.clamp(pred_flat, 0.0, 1.0)
     grid_pred = pred_flat.reshape(grid_size, grid_size).numpy()
-    grid_pred = np.clip(grid_pred, 0, 1)  # Clamp the predictions between 0 and 1
+    grid_pred = np.clip(grid_pred, 0, 1)  # Clamp predictions between 0 and 1
     predicted_grids.append(grid_pred)
 
-    stds_flat = output[0, i, SM_dim:]
-    standard_deviations.append(stds_flat)
+# Plot ground truth encoding steps with grid outlines
 plt.figure(figsize=(15, 3))
 total_plots = 10
-# Plot ground truth encoding steps
 for i in range(total_plots):
-    plt.subplot(1, total_plots, i+1)
-    plt.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
-    plt.title(f"GT Step {i}")
-    plt.axis('off')
+    ax = plt.subplot(1, total_plots, i+1)
+    ax.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
+    ax.set_title(f"GT Step {i}")
+    # Add rectangle outline
+    rect = patches.Rectangle(
+        (-0.5, -0.5), grid_size, grid_size, 
+        linewidth=1, edgecolor='black', facecolor='none'
+    )
+    ax.add_patch(rect)
+    ax.axis('off')
 plt.tight_layout()
 
-# Visualize the input (ground truth) and model predictions in one window
+# Visualize both the ground truth and model predictions with grid outlines
 total_plots = num_encoding + num_query
 plt.figure(figsize=(15, 3))
-# Plot ground truth encoding steps
 for i in range(num_encoding):
-    plt.subplot(1, total_plots, i+1)
-    plt.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
-    plt.title(f"GT Step {i}")
-    plt.axis('off')
-# Plot model predictions for query steps
+    ax = plt.subplot(1, total_plots, i+1)
+    ax.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
+    ax.set_title(f"GT Step {i}")
+    rect = patches.Rectangle(
+        (-0.5, -0.5), grid_size, grid_size,
+        linewidth=1, edgecolor='black', facecolor='none'
+    )
+    ax.add_patch(rect)
+    ax.axis('off')
+
 for idx, t in enumerate(query_steps):
-    plt.subplot(1, total_plots, num_encoding+idx+1)
-    plt.imshow(predicted_grids[idx], cmap='Greys', interpolation='none')
-    plt.title(f"Pred Step {t}")
-    plt.axis('off')
+    ax = plt.subplot(1, total_plots, num_encoding + idx + 1)
+    ax.imshow(predicted_grids[idx], cmap='Greys', interpolation='none')
+    ax.set_title(f"Pred Step {t}")
+    rect = patches.Rectangle(
+        (-0.5, -0.5), grid_size, grid_size,
+        linewidth=1, edgecolor='black', facecolor='none'
+    )
+    ax.add_patch(rect)
+    ax.axis('off')
 plt.tight_layout()
 plt.show()
-
-
-#print(standard_deviations[0])

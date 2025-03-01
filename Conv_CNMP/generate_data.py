@@ -61,8 +61,6 @@ def simulate(pedestrians: set[Pedestrian], steps: int):
             ped.move()
         
         grids.append(grid)
-        # Optionally, update visualization if needed
-        # plot_grid(grid, step_count)
 
     grids_tensor = torch.tensor(grids, dtype=torch.float32)
     return grids_tensor
@@ -72,7 +70,7 @@ x_min, x_max = int(ENV_SIZE * 1 / 5), int(ENV_SIZE * 4 / 5)
 y_min, y_max = int(ENV_SIZE * 1 / 5), int(ENV_SIZE * 4 / 5)
 
 if __name__ == "__main__":
-    observation_count = 20
+    observation_count = 1
     all_grids = []
     for i in range(observation_count):
         pedestrians = set()
@@ -82,7 +80,7 @@ if __name__ == "__main__":
             yVel = random.choice([-PEDESTRIAN_MAX_VEL, PEDESTRIAN_MAX_VEL])
             pedestrians.add(Pedestrian(x, y, xVel, yVel))
         
-        grids_tensor = simulate(pedestrians, 20) # no step
+        grids_tensor = simulate(pedestrians, 10) # no step
         all_grids.append(grids_tensor)
     
     # Stack all tensors into one tensor
