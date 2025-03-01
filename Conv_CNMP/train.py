@@ -12,15 +12,16 @@ import math
 t_dim = 1                      # step index dimension
 grid_size = 32                 # grid size (32x32)
 
-cnn_channels = [32, 64, 128]  # Stronger CNN feature extraction
-encoder_hidden_dims = [512, 256, 128]  # Gradually decrease dimensions
-latent_dim = 128  # More compact representation 
-decoder_hidden_dims = [128, 256, 512]  # Mirror encoder but reversed
+# Try simpler architecture first
+cnn_channels = [16, 32, 64]  # Reduced complexity
+encoder_hidden_dims = [128, 64]  # Simplified
+latent_dim = 32  # Smaller latent space
+decoder_hidden_dims = [64, 128]  # Simplified
 
 
-batch_size = 16
-num_epochs = 1000
-learning_rate = 0.0003
+batch_size = 512
+num_epochs = 10000
+learning_rate = 0.0001
 
 wandb.init(
     project="ped_forecasting",
@@ -28,6 +29,7 @@ wandb.init(
         "learning_rate": 0.0001,
         "architecture": "CNN_CNMP",
         "epochs": num_epochs,
+        "batch_siize": batch_size,
         "encoder_hidden_dims": encoder_hidden_dims,
         "latent_dim": latent_dim,
         "decoder_hidden_dims": decoder_hidden_dims,
@@ -43,7 +45,7 @@ data_path = "grids_tensor.pt"
 grids_tensor = torch.load(data_path)
 
 # Create the dataset and split into train and validation sets
-dataset = GridDataset(grids_tensor, max_encodings=10, max_queries=10)
+dataset = GridDataset(grids_tensor, max_encodings=5, max_queries=5)
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
 train_dataset = torch.utils.data.Subset(dataset, range(val_size, len(dataset)))
@@ -129,6 +131,7 @@ for epoch in range(num_epochs):
     estimated_total_time = elapsed_time / (epoch + 1) * num_epochs
     estimated_time_left = estimated_total_time - elapsed_time
     wandb.log({"train_loss": avg_train_loss})
+    wandb.log({"time_left": round(estimated_time_left)})
     print(f"Epoch {epoch+1}/{num_epochs}, Training Loss: {avg_train_loss:.4f} Time Left: {estimated_time_left:.2f} seconds")
 
 # Save the trained model

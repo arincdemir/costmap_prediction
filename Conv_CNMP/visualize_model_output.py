@@ -14,10 +14,11 @@ max_queries = 5    # new parameter for querying
 t_dim = 1                      # step index dimension
 grid_size = 32                 # grid size (32x32)
 
-cnn_channels = [32, 64, 128]  # Stronger CNN feature extraction
-encoder_hidden_dims = [512, 256, 128]  # Gradually decrease dimensions
-latent_dim = 128  # More compact representation 
-decoder_hidden_dims = [128, 256, 512]  # Mirror encoder but reversed
+# Try simpler architecture first
+cnn_channels = [16, 32, 64]  # Reduced complexity
+encoder_hidden_dims = [256, 128]  # Simplified
+latent_dim = 128  # Smaller latent space
+decoder_hidden_dims = [256, 512]  # Simplified
 
 
 # Initialize the CNN_CNMP model
@@ -38,7 +39,7 @@ data_path = os.path.join(os.path.dirname(__file__), "grids_tensor.pt")
 all_grids_tensor = torch.load(data_path, map_location=torch.device("cpu"))
 
 # Pick one simulation sample (here using the last simulation)
-simulation = all_grids_tensor[-1]  # shape: (steps, grid_size, grid_size)
+simulation = all_grids_tensor[4]  # shape: (steps, grid_size, grid_size)
 steps = simulation.shape[0]
 
 # Set encoding and query lengths

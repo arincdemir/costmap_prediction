@@ -3,3 +3,5 @@ wandb/
 __pycache__
 
 trained_cnmp*.pth
+trained_model*.pth
+grids_tensor.pth

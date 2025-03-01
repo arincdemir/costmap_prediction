@@ -70,7 +70,7 @@ x_min, x_max = int(ENV_SIZE * 1 / 5), int(ENV_SIZE * 4 / 5)
 y_min, y_max = int(ENV_SIZE * 1 / 5), int(ENV_SIZE * 4 / 5)
 
 if __name__ == "__main__":
-    observation_count = 1
+    observation_count = 1280
     all_grids = []
     for i in range(observation_count):
         pedestrians = set()
