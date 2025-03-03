@@ -11,7 +11,7 @@ CAPTURED_GRID_SIZE = 32
 ENV_SIZE = CAPTURED_GRID_SIZE
 
 PEDESTRIAN_MAX_VEL = 1
-PEDESTRIAN_COUNT = 1
+PEDESTRIAN_COUNT = 3
 PEDESTRIAN_RADIUS = 2
 
 class Pedestrian:
@@ -70,7 +70,7 @@ x_min, x_max = int(ENV_SIZE * 1 / 5), int(ENV_SIZE * 4 / 5)
 y_min, y_max = int(ENV_SIZE * 1 / 5), int(ENV_SIZE * 4 / 5)
 
 if __name__ == "__main__":
-    observation_count = 1280
+    observation_count = 2560
     all_grids = []
     for i in range(observation_count):
         pedestrians = set()

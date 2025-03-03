@@ -39,7 +39,7 @@ data_path = os.path.join(os.path.dirname(__file__), "grids_tensor.pt")
 all_grids_tensor = torch.load(data_path, map_location=torch.device("cpu"))
 
 # Pick one simulation sample (here using the last simulation)
-simulation = all_grids_tensor[5]  # shape: (steps, grid_size, grid_size)
+simulation = all_grids_tensor[4]  # shape: (steps, grid_size, grid_size)
 steps = simulation.shape[0]
 
 # Set encoding and query lengths
