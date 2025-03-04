@@ -14,22 +14,23 @@ t_dim = 1                      # step index dimension
 grid_size = 32                 # grid size (32x32)
 
 # Try simpler architecture first
-cnn_channels = [16, 32, 64]  # Reduced complexity
-encoder_hidden_dims = [256, 128]  # Simplified
-latent_dim = 128  # Smaller latent space
-decoder_hidden_dims = [256, 512]  # Simplified
+cnn_channels = [32, 64, 128]  # Increased capacity
+encoder_hidden_dims = [512, 256]  # Increased capacity
+latent_dim = 256  # Smaller latent space
+decoder_hidden_dims = [512, 1024]  # Increased capacity
 
-dropout_rate = 0.2
+
+dropout_rate = 0.15
 batch_size = 128
 num_epochs = 30000
-learning_rate = 0.00036
+learning_rate = 0.00072
 
-early_stopping_patience = 20  # Number of epochs to wait before stopping
+early_stopping_patience = 25  # Number of epochs to wait before stopping
 early_stopping_min_delta = 0.000001  # Minimum change to qualify as an improvement
 early_stopping_counter = 0  # Counter for patience
 
-scheduler_patience = 5
-scheduler_factor = 0.7
+scheduler_patience = "na"
+scheduler_factor = "na"
 
 
 wandb.init(
@@ -86,6 +87,8 @@ model = CNN_CNMP(
 ).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+"""
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, 
     mode='min', 
@@ -93,6 +96,7 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(
     factor=scheduler_factor,        # Reduce LR by smaller amount (30% reduction)
     min_lr=1e-6,       # Don't let LR go below this
 )
+"""
 
 start_time = time.time()
 best_val_loss = math.inf  # Initialize best validation loss
@@ -140,7 +144,7 @@ try:
                     epoch_val_loss += loss.item()
                     
             avg_val_loss = epoch_val_loss / len(val_loader)
-            scheduler.step(avg_val_loss)
+            #scheduler.step(avg_val_loss)
             wandb.log({"validation_loss": avg_val_loss}, step=epoch)
             print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {avg_val_loss:.8f}")
             current_lr = optimizer.param_groups[0]['lr']
@@ -153,12 +157,13 @@ try:
                 early_stopping_counter = 0  # Reset counter
             else:
                 early_stopping_counter += 1
-                print(f"Early stopping counter: {early_stopping_counter}/{early_stopping_patience}")
+                #print(f"Early stopping counter: {early_stopping_counter}/{early_stopping_patience}")
                 
             # Check if should stop training
             if early_stopping_counter >= early_stopping_patience:
-                print(f"Early stopping triggered after {epoch+1} epochs. No improvement for {early_stopping_patience} validation checks.")
-                break  # Exit the training loop
+                #print(f"Early stopping triggered after {epoch+1} epochs. No improvement for {early_stopping_patience} validation checks.")
+                #break  # Exit the training loop
+                pass
 
 
         epoch_duration = time.time() - epoch_start_time
