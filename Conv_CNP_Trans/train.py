@@ -22,7 +22,7 @@ decoder_hidden_dims = [512, 1024]  # Increased capacity
 
 dropout_rate = 0.15
 batch_size = 128
-num_epochs = 15000
+num_epochs = 25000
 learning_rate = 0.001
 
 early_stopping_patience = 25  # Number of epochs to wait before stopping
