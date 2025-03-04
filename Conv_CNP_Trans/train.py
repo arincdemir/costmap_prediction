@@ -20,9 +20,9 @@ latent_dim = 128  # Smaller latent space
 decoder_hidden_dims = [256, 512]  # Simplified
 
 
-batch_size = 512
-num_epochs = 40000
-learning_rate = 0.00009
+batch_size = 128
+num_epochs = 30000
+learning_rate = 0.00036
 
 wandb.init(
     project="ped_forecasting",
@@ -42,7 +42,7 @@ wandb.init(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load data generated earlier
-data_path = "grids_tensor.pt"
+data_path = "Conv_CNP_Trans/grids_tensor.pt"
 grids_tensor = torch.load(data_path)
 
 # Create the dataset and split into train and validation sets
