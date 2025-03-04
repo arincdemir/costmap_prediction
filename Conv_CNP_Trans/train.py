@@ -19,7 +19,7 @@ encoder_hidden_dims = [256, 128]  # Simplified
 latent_dim = 128  # Smaller latent space
 decoder_hidden_dims = [256, 512]  # Simplified
 
-
+dropout_rate = 0.2
 batch_size = 128
 num_epochs = 30000
 learning_rate = 0.00036
@@ -35,7 +35,8 @@ wandb.init(
         "latent_dim": latent_dim,
         "decoder_hidden_dims": decoder_hidden_dims,
         "cnn_channels": cnn_channels,
-        "grid_size": grid_size
+        "grid_size": grid_size,
+        "dropout_rate": dropout_rate
     }
 )
 
@@ -51,6 +52,8 @@ train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
 train_dataset = torch.utils.data.Subset(dataset, range(val_size, len(dataset)))
 val_dataset = torch.utils.data.Subset(dataset, range(val_size))
+
+
 
 # TODO I did this for trying to overfit the model with just one simulation.
 #train_dataset = dataset
@@ -68,7 +71,8 @@ model = CNN_CNMP(
     encoder_hidden_dims=encoder_hidden_dims,
     decoder_hidden_dims=decoder_hidden_dims,
     latent_dim=latent_dim,
-    cnn_channels=cnn_channels
+    cnn_channels=cnn_channels,
+    dropout_rate=dropout_rate  # Add dropout parameter
 ).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -98,6 +102,7 @@ try:
             output = model(padded_time_indices, padded_grids, encodings_mask, padded_query_indices, queries_mask)
             loss = model.loss(output, padded_query_targets, queries_mask)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             epoch_train_loss += loss.item()
 
