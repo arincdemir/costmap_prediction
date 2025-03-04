@@ -23,7 +23,7 @@ decoder_hidden_dims = [512, 1024]  # Increased capacity
 dropout_rate = 0.15
 batch_size = 128
 num_epochs = 15000
-learning_rate = 0.00072
+learning_rate = 0.001
 
 early_stopping_patience = 25  # Number of epochs to wait before stopping
 early_stopping_min_delta = 0.000001  # Minimum change to qualify as an improvement
@@ -31,6 +31,8 @@ early_stopping_counter = 0  # Counter for patience
 
 scheduler_patience = "na"
 scheduler_factor = "na"
+
+model_output_name_addition = 2
 
 
 wandb.init(
@@ -47,7 +49,8 @@ wandb.init(
         "grid_size": grid_size,
         "dropout_rate": dropout_rate,
         "scheduler_patience": scheduler_patience,
-        "scheduler_factor": scheduler_factor
+        "scheduler_factor": scheduler_factor,
+        "model_output_name_addition": model_output_name_addition
     }
 )
 
@@ -87,6 +90,7 @@ model = CNN_CNMP(
 ).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+print(f"Learning rate: {learning_rate}")
 
 """
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(
@@ -152,7 +156,7 @@ try:
             # Early stopping check
             if avg_val_loss < best_val_loss - early_stopping_min_delta:
                 best_val_loss = avg_val_loss
-                torch.save(model.state_dict(), "trained_model_best1.pth")
+                torch.save(model.state_dict(), f"trained_model_best{model_output_name_addition}.pth")
                 print(f"New best model found and saved with validation loss: {best_val_loss:.8f}")
                 early_stopping_counter = 0  # Reset counter
             else:
@@ -179,7 +183,7 @@ try:
 
 except KeyboardInterrupt:
     print("Training interrupted. Saving current model state...")
-    torch.save(model.state_dict(), "trained_model_interrupt1.pth")
+    torch.save(model.state_dict(), f"trained_model_interrupt{model_output_name_addition}.pth")
     print("Model state saved. Exiting training loop.")
     print(f"Best validation loss: {best_val_loss}")
     
@@ -195,6 +199,6 @@ try:
 except BrokenPipeError:
     print("Warning: BrokenPipeError caught during wandb.finish(). Continuing to save the model...")
 
-torch.save(model.state_dict(), "trained_model1.pth")
-print("Training complete. Model saved to trained_model1.pth")
+torch.save(model.state_dict(), f"trained_model{model_output_name_addition}.pth")
+print(f"Training complete. Model saved to trained_model{model_output_name_addition}.pth")
 print(f"Best validation loss: {best_val_loss}")
