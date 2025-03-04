@@ -92,7 +92,6 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(
     patience=scheduler_patience,       # Wait longer before reducing
     factor=scheduler_factor,        # Reduce LR by smaller amount (30% reduction)
     min_lr=1e-6,       # Don't let LR go below this
-    verbose=True
 )
 
 start_time = time.time()
@@ -144,7 +143,8 @@ try:
             scheduler.step(avg_val_loss)
             wandb.log({"validation_loss": avg_val_loss}, step=epoch)
             print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {avg_val_loss:.8f}")
-
+            current_lr = optimizer.param_groups[0]['lr']
+            wandb.log({"learning_rate": current_lr}, step=epoch)
             # Early stopping check
             if avg_val_loss < best_val_loss - early_stopping_min_delta:
                 best_val_loss = avg_val_loss
