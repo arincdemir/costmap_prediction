@@ -22,7 +22,7 @@ decoder_hidden_dims = [512, 1024]  # Increased capacity
 
 dropout_rate = 0.15
 batch_size = 128
-num_epochs = 30000
+num_epochs = 15000
 learning_rate = 0.00072
 
 early_stopping_patience = 25  # Number of epochs to wait before stopping
@@ -152,7 +152,7 @@ try:
             # Early stopping check
             if avg_val_loss < best_val_loss - early_stopping_min_delta:
                 best_val_loss = avg_val_loss
-                torch.save(model.state_dict(), "trained_model_best.pth")
+                torch.save(model.state_dict(), "trained_model_best1.pth")
                 print(f"New best model found and saved with validation loss: {best_val_loss:.8f}")
                 early_stopping_counter = 0  # Reset counter
             else:
@@ -179,7 +179,7 @@ try:
 
 except KeyboardInterrupt:
     print("Training interrupted. Saving current model state...")
-    torch.save(model.state_dict(), "trained_model_interrupt.pth")
+    torch.save(model.state_dict(), "trained_model_interrupt1.pth")
     print("Model state saved. Exiting training loop.")
     print(f"Best validation loss: {best_val_loss}")
     
@@ -195,6 +195,6 @@ try:
 except BrokenPipeError:
     print("Warning: BrokenPipeError caught during wandb.finish(). Continuing to save the model...")
 
-torch.save(model.state_dict(), "trained_model.pth")
-print("Training complete. Model saved to trained_model.pth")
+torch.save(model.state_dict(), "trained_model1.pth")
+print("Training complete. Model saved to trained_model1.pth")
 print(f"Best validation loss: {best_val_loss}")
