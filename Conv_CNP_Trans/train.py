@@ -42,7 +42,7 @@ wandb.init(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load data generated earlier
-data_path = "Conv_CNP_Trans/grids_tensor.pt"
+data_path = "grids_tensor.pt"
 grids_tensor = torch.load(data_path)
 
 # Create the dataset and split into train and validation sets
