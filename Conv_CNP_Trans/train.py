@@ -24,6 +24,14 @@ batch_size = 128
 num_epochs = 30000
 learning_rate = 0.00036
 
+early_stopping_patience = 20  # Number of epochs to wait before stopping
+early_stopping_min_delta = 0.000001  # Minimum change to qualify as an improvement
+early_stopping_counter = 0  # Counter for patience
+
+scheduler_patience = 5
+scheduler_factor = 0.7
+
+
 wandb.init(
     project="ped_forecasting",
     config={
@@ -36,7 +44,9 @@ wandb.init(
         "decoder_hidden_dims": decoder_hidden_dims,
         "cnn_channels": cnn_channels,
         "grid_size": grid_size,
-        "dropout_rate": dropout_rate
+        "dropout_rate": dropout_rate,
+        "scheduler_patience": scheduler_patience,
+        "scheduler_factor": scheduler_factor
     }
 )
 
@@ -76,8 +86,14 @@ model = CNN_CNMP(
 ).to(device)
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-#scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=5, factor=0.5, verbose=True)
-
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, 
+    mode='min', 
+    patience=scheduler_patience,       # Wait longer before reducing
+    factor=scheduler_factor,        # Reduce LR by smaller amount (30% reduction)
+    min_lr=1e-6,       # Don't let LR go below this
+    verbose=True
+)
 
 start_time = time.time()
 best_val_loss = math.inf  # Initialize best validation loss
@@ -125,13 +141,25 @@ try:
                     epoch_val_loss += loss.item()
                     
             avg_val_loss = epoch_val_loss / len(val_loader)
+            scheduler.step(avg_val_loss)
             wandb.log({"validation_loss": avg_val_loss}, step=epoch)
             print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {avg_val_loss:.8f}")
 
-            if avg_val_loss < best_val_loss:
+            # Early stopping check
+            if avg_val_loss < best_val_loss - early_stopping_min_delta:
                 best_val_loss = avg_val_loss
                 torch.save(model.state_dict(), "trained_model_best.pth")
                 print(f"New best model found and saved with validation loss: {best_val_loss:.8f}")
+                early_stopping_counter = 0  # Reset counter
+            else:
+                early_stopping_counter += 1
+                print(f"Early stopping counter: {early_stopping_counter}/{early_stopping_patience}")
+                
+            # Check if should stop training
+            if early_stopping_counter >= early_stopping_patience:
+                print(f"Early stopping triggered after {epoch+1} epochs. No improvement for {early_stopping_patience} validation checks.")
+                break  # Exit the training loop
+
 
         epoch_duration = time.time() - epoch_start_time
         elapsed_time = time.time() - start_time
