@@ -71,75 +71,83 @@ def train(config=None):
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
         start_time = time.time()
+        
+        # Initialize best validation loss tracker
+        best_val_loss = float('inf')
+        best_model_path = f"best_model_{model_output_name_addition}.pth"
+        
 
-        try:
-            for epoch in range(num_epochs):
-                epoch_start_time = time.time()
-                model.train()
-                epoch_train_loss = 0.0
+        for epoch in range(num_epochs):
+            epoch_start_time = time.time()
+            model.train()
+            epoch_train_loss = 0.0
 
-                for padded_time_indices, padded_grids, encodings_mask, padded_query_indices, padded_query_targets, queries_mask in train_loader:
-                    # Move data to GPU
-                    padded_time_indices = padded_time_indices.to(device)
-                    padded_grids = padded_grids.to(device)
-                    encodings_mask = encodings_mask.to(device)
-                    padded_query_indices = padded_query_indices.to(device)
-                    padded_query_targets = padded_query_targets.to(device)
-                    queries_mask = queries_mask.to(device)
+            for padded_time_indices, padded_grids, encodings_mask, padded_query_indices, padded_query_targets, queries_mask in train_loader:
+                # Move data to GPU
+                padded_time_indices = padded_time_indices.to(device)
+                padded_grids = padded_grids.to(device)
+                encodings_mask = encodings_mask.to(device)
+                padded_query_indices = padded_query_indices.to(device)
+                padded_query_targets = padded_query_targets.to(device)
+                queries_mask = queries_mask.to(device)
 
-                    optimizer.zero_grad()
-                    output = model(padded_time_indices, padded_grids, encodings_mask, padded_query_indices, queries_mask)
-                    loss = model.loss(output, padded_query_targets, queries_mask)
-                    loss.backward()
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-                    optimizer.step()
-                    epoch_train_loss += loss.item()
+                optimizer.zero_grad()
+                output = model(padded_time_indices, padded_grids, encodings_mask, padded_query_indices, queries_mask)
+                loss = model.loss(output, padded_query_targets, queries_mask)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
+                epoch_train_loss += loss.item()
 
-                avg_train_loss = epoch_train_loss / len(train_loader)
-                wandb.log({"train_loss": avg_train_loss}, step=epoch)
+            avg_train_loss = epoch_train_loss / len(train_loader)
+            wandb.log({"train_loss": avg_train_loss}, step=epoch)
 
-                if (epoch + 1) % 5 == 0:
-                    model.eval()
-                    epoch_val_loss = 0.0
-                    with torch.no_grad():
-                        for padded_time_indices, padded_grids, encodings_mask, padded_query_indices, padded_query_targets, queries_mask in val_loader:
-                            padded_time_indices = padded_time_indices.to(device)
-                            padded_grids = padded_grids.to(device)
-                            encodings_mask = encodings_mask.to(device)
-                            padded_query_indices = padded_query_indices.to(device)
-                            padded_query_targets = padded_query_targets.to(device)
-                            queries_mask = queries_mask.to(device)
-                            
-                            output = model(padded_time_indices, padded_grids, encodings_mask, padded_query_indices, queries_mask)
-                            loss = model.loss(output, padded_query_targets, queries_mask)
-                            epoch_val_loss += loss.item()
-                            
-                    avg_val_loss = epoch_val_loss / len(val_loader)
-                    wandb.log({"validation_loss": avg_val_loss}, step=epoch)
-                    print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {avg_val_loss:.8f}")
-                    
-                    # Removed learning rate logging and scheduling
-
-                # Estimate remaining time
-                epoch_duration = time.time() - epoch_start_time
-                elapsed_time = time.time() - start_time
-                estimated_total_time = elapsed_time / (epoch + 1) * num_epochs
-                estimated_time_left = estimated_total_time - elapsed_time
+            if (epoch + 1) % 5 == 0:
+                model.eval()
+                epoch_val_loss = 0.0
+                with torch.no_grad():
+                    for padded_time_indices, padded_grids, encodings_mask, padded_query_indices, padded_query_targets, queries_mask in val_loader:
+                        padded_time_indices = padded_time_indices.to(device)
+                        padded_grids = padded_grids.to(device)
+                        encodings_mask = encodings_mask.to(device)
+                        padded_query_indices = padded_query_indices.to(device)
+                        padded_query_targets = padded_query_targets.to(device)
+                        queries_mask = queries_mask.to(device)
+                        
+                        output = model(padded_time_indices, padded_grids, encodings_mask, padded_query_indices, queries_mask)
+                        loss = model.loss(output, padded_query_targets, queries_mask)
+                        epoch_val_loss += loss.item()
+                        
+                avg_val_loss = epoch_val_loss / len(val_loader)
+                wandb.log({"validation_loss": avg_val_loss}, step=epoch)
+                print(f"Epoch {epoch+1}/{num_epochs}, Validation Loss: {avg_val_loss:.8f}")
                 
-                if epoch > 20:
-                    wandb.log({"time_left": round(estimated_time_left)}, step=epoch)
-            
-                print(f"Epoch {epoch+1}/{num_epochs}, Training Loss: {avg_train_loss:.8f} Time Left: {estimated_time_left:.2f} seconds")
+                # Save best model based on validation loss
+                if avg_val_loss < best_val_loss:
+                    best_val_loss = avg_val_loss
+                    # Save the best model locally
+                    torch.save(model.state_dict(), best_model_path)
+                    print(f"New best model saved with validation loss: {best_val_loss:.8f}")
 
-            # Save final model
-            torch.save(model.state_dict(), f"trained_model_{model_output_name_addition}.pth")
-            print(f"Training complete. Model saved to trained_model_{model_output_name_addition}.pth")
+
+            # Estimate remaining time
+            elapsed_time = time.time() - start_time
+            estimated_total_time = elapsed_time / (epoch + 1) * num_epochs
+            estimated_time_left = estimated_total_time - elapsed_time
             
-        except KeyboardInterrupt:
-            print("Training interrupted. Saving current model state...")
-            torch.save(model.state_dict(), f"trained_model_interrupt_{model_output_name_addition}.pth")
-            print("Model state saved. Exiting training loop.")
-            
+            if epoch > 20:
+                wandb.log({"time_left": round(estimated_time_left)}, step=epoch)
+        
+            print(f"Epoch {epoch+1}/{num_epochs}, Training Loss: {avg_train_loss:.8f} Time Left: {estimated_time_left:.2f} seconds")
+
+        # Save final model
+        torch.save(model.state_dict(), f"trained_model_{model_output_name_addition}.pth")
+        print(f"Training complete. Model saved to trained_model_{model_output_name_addition}.pth")
+        artifact = wandb.Artifact(f"model-{run.id}", type="model")
+        artifact.add_file(best_model_path)
+        run.log_artifact(artifact)
+        print(f"Best model (validation loss: {best_val_loss:.8f}) uploaded to wandb")
+    
         return avg_val_loss
 
 

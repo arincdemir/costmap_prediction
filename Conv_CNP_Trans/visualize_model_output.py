@@ -8,24 +8,15 @@ from CNN_CNMP import CNN_CNMP
 # Hyperparameters (must match training)
 grid_size = 32
 max_encodings = 5  # as used in the model and dataset
-max_queries = 5    # new parameter for querying
 
-# Hyperparameters
-t_dim = 1                      # step index dimension
-grid_size = 32                 # grid size (32x32)
+t_dim = 1  # step index dimension
 
-# Try simpler architecture first
-cnn_channels = [32, 32, 64]  # Increased capacity
-encoder_hidden_dims = [256,256]  # Increased capacity
-latent_dim = 256  # Smaller latent space
-decoder_hidden_dims = [256,256,512]  # Increased capacity
+# Model architecture parameters
+cnn_channels = [32, 32, 64]       # Increased capacity
+encoder_hidden_dims = [256, 256]  # Increased capacity
+latent_dim = 256                # Smaller latent space
+decoder_hidden_dims = [256, 256, 512]  # Increased capacity
 dropout_rate = 0.2
-
-
-batch_size = 128
-num_epochs = 25000
-learning_rate = 0.001
-
 
 # Initialize the CNN_CNMP model
 model = CNN_CNMP(
@@ -64,7 +55,7 @@ for i in range(num_encoding):
     padded_grids[i] = simulation[i]
     encodings_mask[i] = True
 
-# Prepare query inputs: time steps from num_encoding to num_encoding+num_query-1
+# Prepare query inputs: time steps from num_encoding to num_encoding + num_query - 1
 query_steps = list(range(num_encoding, num_encoding + num_query))
 padded_query_indices = (torch.tensor(query_steps, dtype=torch.float32).unsqueeze(1) / steps)  # shape: (num_query, 1)
 queries_mask = torch.ones(num_query, dtype=torch.bool)
@@ -87,12 +78,12 @@ predicted_grids = output[0].cpu().numpy()
 plt.figure(figsize=(15, 3))
 total_plots = 10
 for i in range(total_plots):
-    ax = plt.subplot(1, total_plots, i+1)
+    ax = plt.subplot(1, total_plots, i + 1)
     ax.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
     ax.set_title(f"GT Step {i}")
     # Add rectangle outline
     rect = patches.Rectangle(
-        (-0.5, -0.5), grid_size, grid_size, 
+        (-0.5, -0.5), grid_size, grid_size,
         linewidth=1, edgecolor='black', facecolor='none'
     )
     ax.add_patch(rect)
@@ -103,7 +94,7 @@ plt.tight_layout()
 total_plots = num_encoding + num_query
 plt.figure(figsize=(15, 3))
 for i in range(num_encoding):
-    ax = plt.subplot(1, total_plots, i+1)
+    ax = plt.subplot(1, total_plots, i + 1)
     ax.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
     ax.set_title(f"GT Step {i}")
     rect = patches.Rectangle(
