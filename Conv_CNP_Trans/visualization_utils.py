@@ -95,26 +95,6 @@ def visualize_model_predictions(model, data_tensor, num_samples=3, num_encoding=
             ax.add_patch(rect)
             ax.axis('off')
 
-        # Show prediction vs ground truth
-        for idx, t in enumerate(query_steps):
-            ax = plt.subplot(2, total_plots, total_plots + num_encoding + idx + 1)
-            pred_img = ax.imshow(predicted_grids[idx], cmap='Greys', interpolation='none')
-            
-            # Compare with ground truth if available
-            if t < steps:
-                gt_overlay = simulation[t].numpy()
-                # Add ground truth contour
-                ax.contour(gt_overlay, levels=[0.5], colors='red', linestyles='solid')
-                ax.set_title(f"Pred {t}\n(GT overlay)")
-            else:
-                ax.set_title(f"Pred {t}")
-                
-            rect = patches.Rectangle(
-                (-0.5, -0.5), grid_size, grid_size,
-                linewidth=1, edgecolor='black', facecolor='none'
-            )
-            ax.add_patch(rect)
-            ax.axis('off')
         
         plt.suptitle(f"Sample {sample_idx + 1}")
         plt.tight_layout()
