@@ -15,13 +15,13 @@ t_dim = 1                      # step index dimension
 grid_size = 32                 # grid size (32x32)
 
 # Try simpler architecture first
-cnn_channels = [32, 64, 128]  # Increased capacity
-encoder_hidden_dims = [512, 256]  # Increased capacity
+cnn_channels = [32, 32, 64]  # Increased capacity
+encoder_hidden_dims = [256,256]  # Increased capacity
 latent_dim = 256  # Smaller latent space
-decoder_hidden_dims = [512, 1024]  # Increased capacity
+decoder_hidden_dims = [256,256,512]  # Increased capacity
+dropout_rate = 0.2
 
 
-dropout_rate = 0.15
 batch_size = 128
 num_epochs = 25000
 learning_rate = 0.001
@@ -34,9 +34,10 @@ model = CNN_CNMP(
     encoder_hidden_dims=encoder_hidden_dims,
     decoder_hidden_dims=decoder_hidden_dims,
     latent_dim=latent_dim,
-    cnn_channels=cnn_channels
+    cnn_channels=cnn_channels,
+    dropout_rate=dropout_rate
 )
-model_path = os.path.join(os.path.dirname(__file__), "trained_model_best2.pth")
+model_path = os.path.join(os.path.dirname(__file__), "trained_model_best1.pth")
 model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 model.eval()
 
