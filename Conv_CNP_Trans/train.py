@@ -9,6 +9,8 @@ from dataset import GridDataset
 import wandb
 import math
 import argparse
+from visualization_utils import log_visualizations_to_wandb
+
 
 
 def train(config=None):
@@ -148,6 +150,14 @@ def train(config=None):
         run.log_artifact(artifact)
         print(f"Best model (validation loss: {best_val_loss:.8f}) uploaded to wandb")
     
+        print("Generating model prediction visualizations...")
+        log_visualizations_to_wandb(
+            model_path=best_model_path,
+            data_path="grids_tensor.pt",
+            wandb_run=run,
+            num_samples=3  # Visualize first 3 samples
+        )
+
         return avg_val_loss
 
 
