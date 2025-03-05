@@ -23,7 +23,7 @@ decoder_hidden_dims = [256, 256, 512]  # Increased capacity
 dropout_rate = 0.2
 batch_size = 512
 num_epochs = 10000
-learning_rate = 0.002
+learning_rate = 0.003
 dataset_size = 5120
 dataset_population_factor = 4
 
@@ -34,7 +34,7 @@ early_stopping_counter = 0  # Counter for patience
 scheduler_patience = "na"
 scheduler_factor = "na"
 
-model_output_name_addition = 0
+model_output_name_addition = 1
 
 
 wandb.init(
