@@ -15,10 +15,16 @@ t_dim = 1                      # step index dimension
 grid_size = 32                 # grid size (32x32)
 
 # Try simpler architecture first
-cnn_channels = [16, 32, 64]  # Reduced complexity
-encoder_hidden_dims = [256, 128]  # Simplified
-latent_dim = 128  # Smaller latent space
-decoder_hidden_dims = [256, 512]  # Simplified
+cnn_channels = [32, 64, 128]  # Increased capacity
+encoder_hidden_dims = [512, 256]  # Increased capacity
+latent_dim = 256  # Smaller latent space
+decoder_hidden_dims = [512, 1024]  # Increased capacity
+
+
+dropout_rate = 0.15
+batch_size = 128
+num_epochs = 25000
+learning_rate = 0.001
 
 
 # Initialize the CNN_CNMP model
@@ -30,7 +36,7 @@ model = CNN_CNMP(
     latent_dim=latent_dim,
     cnn_channels=cnn_channels
 )
-model_path = os.path.join(os.path.dirname(__file__), "trained_model_best.pth")
+model_path = os.path.join(os.path.dirname(__file__), "trained_model_best2.pth")
 model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 model.eval()
 
@@ -39,7 +45,7 @@ data_path = os.path.join(os.path.dirname(__file__), "grids_tensor.pt")
 all_grids_tensor = torch.load(data_path, map_location=torch.device("cpu"))
 
 # Pick one simulation sample (here using the last simulation)
-simulation = all_grids_tensor[-3]  # shape: (steps, grid_size, grid_size)
+simulation = all_grids_tensor[2]  # shape: (steps, grid_size, grid_size)
 steps = simulation.shape[0]
 
 # Set encoding and query lengths

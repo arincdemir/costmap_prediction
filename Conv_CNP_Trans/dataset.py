@@ -3,28 +3,22 @@ import torch
 from torch.utils.data import Dataset
 
 class GridDataset(Dataset):
-    def __init__(self, grids_tensor, max_encodings=5, max_queries=5, repeat=200):
+    def __init__(self, grids_tensor, max_encodings=5, max_queries=5, populate_factor=4):
         # grids_tensor shape: [observation_count, steps, grid_size, grid_size]
         self.max_encodings = max_encodings
         self.max_queries = max_queries
         self.inputs = grids_tensor
-        self.targets = grids_tensor
-        self.repeat = repeat  # use to artificially inflate length if needed
+        self.populate_factor = populate_factor
         self.grid_size = grids_tensor.shape[2]  # Get grid size from the tensor
+        self.input_size = grids_tensor.shape[0]  # the size of the actual dataset
 
     def __len__(self):
-        # if only one data item, return repeat value; otherwise, return actual length
-        # I did this to create batches from the same simulation with different random observations.
-        if self.inputs.shape[0] == 1:
-            return self.repeat
-        else:
-            return self.inputs.shape[0]
+        # multiply it by that factor so that you see a trajectory multiple times with different random points
+        return self.input_size * self.populate_factor   
+    
 
     def __getitem__(self, idx):
-        # if only one data item, always use index 0
-        if self.inputs.shape[0] == 1:
-            idx = 0
-
+        idx = idx % self.input_size
         input_grid = self.inputs[idx]
         num_steps, grid_size, _ = input_grid.shape
         

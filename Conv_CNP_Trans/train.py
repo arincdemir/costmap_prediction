@@ -14,16 +14,18 @@ t_dim = 1                      # step index dimension
 grid_size = 32                 # grid size (32x32)
 
 # Try simpler architecture first
-cnn_channels = [32, 64, 128]  # Increased capacity
-encoder_hidden_dims = [512, 256]  # Increased capacity
+cnn_channels = [32, 32, 64]  # Increased capacity
+encoder_hidden_dims = [256, 256]  # Increased capacity
 latent_dim = 256  # Smaller latent space
-decoder_hidden_dims = [512, 1024]  # Increased capacity
+decoder_hidden_dims = [256, 256, 512]  # Increased capacity
 
 
-dropout_rate = 0.15
-batch_size = 128
+dropout_rate = 0.2
+batch_size = 256
 num_epochs = 25000
 learning_rate = 0.001
+dataset_size = 5120
+dataset_population_factor = 3
 
 early_stopping_patience = 25  # Number of epochs to wait before stopping
 early_stopping_min_delta = 0.000001  # Minimum change to qualify as an improvement
@@ -32,7 +34,7 @@ early_stopping_counter = 0  # Counter for patience
 scheduler_patience = "na"
 scheduler_factor = "na"
 
-model_output_name_addition = 2
+model_output_name_addition = 0
 
 
 wandb.init(
@@ -50,7 +52,9 @@ wandb.init(
         "dropout_rate": dropout_rate,
         "scheduler_patience": scheduler_patience,
         "scheduler_factor": scheduler_factor,
-        "model_output_name_addition": model_output_name_addition
+        "model_output_name_addition": model_output_name_addition,
+        "dataset_size": dataset_size,
+        "dataset_population_factor": dataset_population_factor,
     }
 )
 
@@ -61,7 +65,7 @@ data_path = "grids_tensor.pt"
 grids_tensor = torch.load(data_path)
 
 # Create the dataset and split into train and validation sets
-dataset = GridDataset(grids_tensor, max_encodings=5, max_queries=5)
+dataset = GridDataset(grids_tensor, max_encodings=5, max_queries=5, populate_factor=dataset_population_factor)
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
 train_dataset = torch.utils.data.Subset(dataset, range(val_size, len(dataset)))
