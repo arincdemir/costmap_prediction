@@ -21,11 +21,11 @@ decoder_hidden_dims = [256, 256, 512]  # Increased capacity
 
 
 dropout_rate = 0.2
-batch_size = 256
-num_epochs = 25000
-learning_rate = 0.001
+batch_size = 512
+num_epochs = 10000
+learning_rate = 0.002
 dataset_size = 5120
-dataset_population_factor = 3
+dataset_population_factor = 4
 
 early_stopping_patience = 25  # Number of epochs to wait before stopping
 early_stopping_min_delta = 0.000001  # Minimum change to qualify as an improvement
