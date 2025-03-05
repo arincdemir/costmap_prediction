@@ -67,7 +67,7 @@ def visualize_model_predictions(model, data_tensor, num_samples=3, num_encoding=
         # Get predictions
         predicted_grids = output[0].cpu().numpy()
 
-        # Create visualization
+         # Create visualization
         fig = plt.figure(figsize=(15, 6))
         
         # Top row: Overview of ground truth steps
@@ -82,19 +82,32 @@ def visualize_model_predictions(model, data_tensor, num_samples=3, num_encoding=
             ax.add_patch(rect)
             ax.axis('off')
             
-        # Bottom row: Ground truth context + predictions
-        total_plots = num_encoding + num_query
-        for i in range(num_encoding):
-            ax = plt.subplot(2, total_plots, total_plots + i + 1)
-            ax.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
-            ax.set_title(f"Input {i}")
+        # Bottom row: First 5 ground truth steps followed by 5 predicted steps
+        # Ground truth images
+        for i in range(5):
+            ax = plt.subplot(2, 10, 10 + i + 1)
+            if i < steps:
+                ax.imshow(simulation[i].numpy(), cmap='Greys', interpolation='none')
+            ax.set_title(f"GT {i}")
             rect = patches.Rectangle(
                 (-0.5, -0.5), grid_size, grid_size,
                 linewidth=1, edgecolor='black', facecolor='none'
             )
             ax.add_patch(rect)
             ax.axis('off')
-
+        
+        # Predicted images
+        for i in range(5):
+            ax = plt.subplot(2, 10, 10 + 5 + i + 1)
+            if i < predicted_grids.shape[0]:
+                ax.imshow(predicted_grids[i], cmap='Greys', interpolation='none')
+            ax.set_title(f"Pred {i}")
+            rect = patches.Rectangle(
+                (-0.5, -0.5), grid_size, grid_size,
+                linewidth=1, edgecolor='black', facecolor='none'
+            )
+            ax.add_patch(rect)
+            ax.axis('off')
         
         plt.suptitle(f"Sample {sample_idx + 1}")
         plt.tight_layout()
