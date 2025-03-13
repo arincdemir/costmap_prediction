@@ -47,7 +47,7 @@ sweep_config = {
 default_params = {
     't_dim': 1,
     'grid_size': 32,
-    'num_epochs': 4000,
+    'num_epochs': 5000,
     'dataset_size': 5120,
     'dataset_population_factor': 4,
     'early_stopping_patience': 25,

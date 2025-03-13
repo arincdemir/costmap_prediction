@@ -5,3 +5,4 @@ __pycache__
 trained_cnmp*.pth
 trained_model*.pth
 grids_tensor*.pt
+best_model_standard*.pth

@@ -39,7 +39,7 @@ def train(config=None):
         # Use run.id as model output name if not provided in config
         model_output_name_addition = wandb.config.get('model_output_name_addition', run.id)
         
-        device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # Load data generated earlier
         data_path = "grids_tensor.pt"
@@ -51,6 +51,10 @@ def train(config=None):
         val_size = len(dataset) - train_size
         train_dataset = torch.utils.data.Subset(dataset, range(val_size, len(dataset)))
         val_dataset = torch.utils.data.Subset(dataset, range(val_size))
+
+        # todo try this to overfit.
+        train_dataset = dataset
+        val_dataset = dataset
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=batch_size)
@@ -198,13 +202,13 @@ if __name__ == "__main__":
         
         # Add other necessary default values (from original training script)
         config.update({
-            'cnn_channels': [32, 32, 64],
+            'cnn_channels': [32, 64, 128],
             'encoder_hidden_dims': [256, 256],
             'latent_dim': 256,
-            'decoder_hidden_dims': [256, 256, 512],
-            'dropout_rate': 0.15,
-            'batch_size': 512,
-            'learning_rate': 0.006,
+            'decoder_hidden_dims': [256, 512, 512],
+            'dropout_rate': 0.1,
+            'batch_size': 128,
+            'learning_rate': 0.0013,
             'model_output_name_addition': 'standard_run'
         })
         
