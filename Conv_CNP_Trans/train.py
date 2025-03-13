@@ -52,9 +52,6 @@ def train(config=None):
         train_dataset = torch.utils.data.Subset(dataset, range(val_size, len(dataset)))
         val_dataset = torch.utils.data.Subset(dataset, range(val_size))
 
-        # todo try this to overfit.
-        train_dataset = dataset
-        val_dataset = dataset
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=batch_size)
