@@ -17,7 +17,7 @@ sweep_config = {
         },
         'dropout_rate': {
             'min': 0.1,
-            'max': 0.15
+            'max': 0.16
         },
         'cnn_channels': {
             'values': [

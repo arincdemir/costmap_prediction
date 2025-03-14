@@ -184,12 +184,14 @@ if __name__ == "__main__":
         print(f"Created sweep with ID: {sweep_id}")
         if args.sweep:
             wandb.agent(sweep_id, function=train, count=args.count)
+            wandb.finish()
     elif args.sweep:
         if not args.sweep_id:
             print("Error: Please provide a sweep ID with --sweep_id or use --create_sweep to create a new sweep")
             sys.exit(1)
         # Run as an agent for an existing sweep
         wandb.agent(args.sweep_id, function=train, count=args.count)
+        wandb.finish()
     else:
         # Regular training run with default params
         config = {}
