@@ -19,7 +19,7 @@ def load_model(model_path):
 def load_test_samples(num_samples=10):
     """Load test samples from the dataset."""
     dataset = GridDataset("grids_tensor.pt")
-    indices = random.sample(range(len(dataset)), num_samples)
+    indices = range(num_samples)
     return [dataset[i] for i in indices]
 
 def visualize_basic(model, device, input_frames, target_frame=None):
