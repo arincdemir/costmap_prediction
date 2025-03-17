@@ -32,7 +32,7 @@ sweep_config = {
         },
         'decoder_hidden_dims': {
             'values': [
-                [128, 128, 256]
+                [128, 128, 256],
                 [256,256,256]
             ]
         },
