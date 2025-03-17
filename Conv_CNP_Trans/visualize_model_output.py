@@ -14,9 +14,9 @@ t_dim = 1  # step index dimension
 # Model architecture parameters
 cnn_channels = [16, 16, 16]       # Increased capacity
 encoder_hidden_dims = [256, 256]  # Increased capacity
-latent_dim = 128              # Smaller latent space
-decoder_hidden_dims = [128, 128, 256]  # Increased capacity
-dropout_rate = 0.14584
+latent_dim = 256             # Smaller latent space
+decoder_hidden_dims = [256, 256, 256]  # Increased capacity
+dropout_rate = 0.1234
 
 # Initialize the CNN_CNMP model
 model = CNN_CNMP(
@@ -28,7 +28,7 @@ model = CNN_CNMP(
     cnn_channels=cnn_channels,
     dropout_rate=dropout_rate
 )
-model_path = os.path.join(os.path.dirname(__file__), "best_model_0kr7vh8t.pth")
+model_path = os.path.join(os.path.dirname(__file__), "best_model_damulu4p.pth")
 model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 model.eval()
 

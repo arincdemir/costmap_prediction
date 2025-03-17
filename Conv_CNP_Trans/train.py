@@ -38,7 +38,7 @@ def train(config=None):
         # Use run.id as model output name if not provided in config
         model_output_name_addition = wandb.config.get('model_output_name_addition', run.id)
         
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
         # Load data generated earlier
         data_path = "grids_tensor.pt"
