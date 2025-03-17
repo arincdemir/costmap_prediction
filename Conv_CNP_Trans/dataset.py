@@ -13,7 +13,7 @@ class GridDataset(Dataset):
 
     def __len__(self):
         # multiply it by that factor so that you see a trajectory multiple times with different random points
-        return self.input_size * self.populate_factor   
+        return self.input_size  
     
 
     def __getitem__(self, idx):
