@@ -200,13 +200,13 @@ if __name__ == "__main__":
         
         # Add other necessary default values (from original training script)
         config.update({
-            'cnn_channels': [256, 128, 64],
-            'encoder_hidden_dims': [256,256,256],
-            'latent_dim': 256,
-            'decoder_hidden_dims': [256,256,256,256],
-            'dropout_rate': 0.1,
+            'cnn_channels': [16, 16, 16],
+            'encoder_hidden_dims': [256,256],
+            'latent_dim': 128,
+            'decoder_hidden_dims': [128,128,256],
+            'dropout_rate': 0.14,
             'batch_size': 32,
-            'learning_rate': 0.0013,
+            'learning_rate': 0.001,
             'model_output_name_addition': 'standard_run'
         })
         

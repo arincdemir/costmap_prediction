@@ -23,52 +23,57 @@ class Pedestrian:
         return 0 <= self.x < GRID_SIZE and 0 <= self.y < GRID_SIZE
 
 def mark_pedestrian_on_grid(grid, ped: Pedestrian):
-    # Mark the pedestrian's area if within the grid.
     if ped.is_inside_grid():
         cx, cy = int(ped.x), int(ped.y)
         r = ped.radius
-        # Loop over a square around the pedestrian and mark cells inside the circle.
         for i in range(max(0, cx - r), min(GRID_SIZE, cx + r + 1)):
             for j in range(max(0, cy - r), min(GRID_SIZE, cy + r + 1)):
                 if (i - cx) ** 2 + (j - cy) ** 2 <= r ** 2:
                     grid[i][j] = 1
 
-def simulate(pedestrian: Pedestrian, steps: int):
+def simulate_multiple(pedestrians: list, steps: int):
     grids = []
-    pedestrian_states = []
+    pedestrians_states = []  # list of pedestrian states per step, each is a list for all pedestrians
 
     for step in range(steps):
         grid = np.zeros((GRID_SIZE, GRID_SIZE))
-        if pedestrian is not None and pedestrian.is_inside_grid():
-            mark_pedestrian_on_grid(grid, pedestrian)
-            pedestrian_states.append((pedestrian.x, pedestrian.y, pedestrian.xVel, pedestrian.yVel, pedestrian.radius))
-            pedestrian.move()
-        else:
-            # Once the pedestrian exits, record a None state and no marking
-            pedestrian_states.append(None)
-            pedestrian = None
-
+        step_states = []  # states for each pedestrian at current step
+        new_pedestrians = []
+        for ped in pedestrians:
+            if ped is not None and ped.is_inside_grid():
+                mark_pedestrian_on_grid(grid, ped)
+                step_states.append((ped.x, ped.y, ped.xVel, ped.yVel, ped.radius))
+                ped.move()
+                new_pedestrians.append(ped)
+            else:
+                step_states.append(None)
+                new_pedestrians.append(None)
         grids.append(grid)
+        pedestrians_states.append(step_states)
+        pedestrians = new_pedestrians
+
     grids_tensor = torch.tensor(grids, dtype=torch.float32)
-    return grids_tensor, pedestrian_states
+    return grids_tensor, pedestrians_states
 
 if __name__ == "__main__":
     observation_count = 10000
+    num_pedestrians = 3
     all_grids = []
     all_states = []
 
     for i in range(observation_count):
-        # Spawn pedestrian inside the grid
-        x = random.randint(int(GRID_SIZE * 1/3), int((GRID_SIZE - 1) * 2/3))
-        y = random.randint(int(GRID_SIZE * 1/3), int((GRID_SIZE - 1) * 2/3))
-        while True:
-            xVel = random.randint(-PEDESTRIAN_MAX_VEL, PEDESTRIAN_MAX_VEL)
-            yVel = random.randint(-PEDESTRIAN_MAX_VEL, PEDESTRIAN_MAX_VEL)
-            if xVel != 0 or yVel != 0:
-                break
-
-        pedestrian = Pedestrian(x, y, xVel, yVel, radius=2)
-        grids_tensor, states = simulate(pedestrian, 10)
+        pedestrians = []
+        for _ in range(num_pedestrians):
+            x = random.randint(int(GRID_SIZE * 1/5), int((GRID_SIZE - 1) * 4/5))
+            y = random.randint(int(GRID_SIZE * 1/3), int((GRID_SIZE - 1) * 2/3))
+            while True:
+                xVel = random.randint(-PEDESTRIAN_MAX_VEL, PEDESTRIAN_MAX_VEL)
+                yVel = random.randint(-PEDESTRIAN_MAX_VEL, PEDESTRIAN_MAX_VEL)
+                if xVel != 0 or yVel != 0:
+                    break
+            pedestrians.append(Pedestrian(x, y, xVel, yVel, radius=2))
+            
+        grids_tensor, states = simulate_multiple(pedestrians, 10)
         all_grids.append(grids_tensor)
         all_states.append(states)
 
@@ -81,7 +86,6 @@ if __name__ == "__main__":
     for step in range(10):
         ax = plt.subplot(1, 10, step + 1)
         ax.imshow(all_grids[0][step], cmap='Greys', interpolation='none')
-        # Draw an outline around the grid
         rect = patches.Rectangle((0, 0), GRID_SIZE - 1, GRID_SIZE - 1, linewidth=1, edgecolor='red', facecolor='none')
         ax.add_patch(rect)
         ax.set_title(f"Step {step}")
