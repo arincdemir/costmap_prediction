@@ -6,32 +6,34 @@ sweep_config = {
     },
     'parameters': {
         'learning_rate': {
-            'min': 0.0001,
-            'max': 0.001
+            'min': 0.001,
+            'max': 0.0011
         },
         'batch_size': {
-            'values': [32]
+            'values': [64]
         },
         'latent_dim': {
-            'values': [256]
+            'values': [128, 256]
         },
         'dropout_rate': {
             'min': 0.1,
-            'max': 0.11
+            'max': 0.16
         },
         'cnn_channels': {
             'values': [
-                [256, 128, 64],
+                [16, 16, 16],
             ]
         },
         'encoder_hidden_dims': {
             'values': [
-                [256,256,256]
+                [128,256],
+                [256,256],
             ]
         },
         'decoder_hidden_dims': {
             'values': [
-                [256,256,256,256]
+                [128, 128, 256]
+                [256,256,256]
             ]
         },
     }
@@ -41,8 +43,8 @@ sweep_config = {
 default_params = {
     't_dim': 1,
     'grid_size': 32,
-    'num_epochs': 20000,
-    'dataset_size': 10240,
+    'num_epochs': 3000,
+    'dataset_size': 10000,
     'early_stopping_patience': 25,
     'early_stopping_min_delta': 0.000001,
 }
