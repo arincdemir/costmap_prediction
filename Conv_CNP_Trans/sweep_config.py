@@ -16,7 +16,7 @@ sweep_config = {
             'values': [128, 256]
         },
         'dropout_rate': {
-            'min': 0.1,
+            'min': 0.11,
             'max': 0.16
         },
         'cnn_channels': {
@@ -26,8 +26,8 @@ sweep_config = {
         },
         'encoder_hidden_dims': {
             'values': [
-                [128,256],
-                [256,256],
+                [256, 256],
+                [256, 256, 256],
             ]
         },
         'decoder_hidden_dims': {
