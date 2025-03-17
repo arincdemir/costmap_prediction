@@ -164,3 +164,46 @@ def log_visualizations_to_wandb(model_path, data_path, wandb_run, num_samples=3)
     print(f"Uploading {len(visualizations)} visualizations to wandb...")
     for idx, img in enumerate(visualizations):
         wandb_run.log({f"visualization_sample_{idx+1}": wandb.Image(img)})
+
+
+
+if __name__ == '__main__':
+    import torch
+    from CNN_CNMP import CNN_CNMP
+
+
+    # Load the data tensor
+    all_grids_tensor = torch.load("Conv_CNP_Trans/grids_tensor.pt", map_location=torch.device('cpu'))
+    
+    # Define a dummy config as used during training.
+    # Adjust these parameters as needed to match your trained model.
+    dummy_config = {
+        't_dim': 1,
+        'grid_size': 32,
+        'encoder_hidden_dims': [512,512],
+        'decoder_hidden_dims': [512,1024,1024],
+        'latent_dim': 384,
+        'cnn_channels': [63,128,256],
+        'dropout_rate': 0.14754
+    }
+    
+    # Initialize the model using the dummy config
+    model = CNN_CNMP(
+        t_dim=dummy_config['t_dim'],
+        grid_size=dummy_config['grid_size'],
+        encoder_hidden_dims=dummy_config['encoder_hidden_dims'],
+        decoder_hidden_dims=dummy_config['decoder_hidden_dims'],
+        latent_dim=dummy_config['latent_dim'],
+        cnn_channels=dummy_config['cnn_channels'],
+        dropout_rate=dummy_config['dropout_rate']
+    )
+    
+    # Load model weights
+    model.load_state_dict(torch.load("Conv_CNP_Trans/best_model_3uolv1we.pth", map_location=torch.device('cpu')))
+    
+    # Generate visualizations and save each image
+    visualizations = visualize_model_predictions(model, all_grids_tensor, num_samples=3)
+    for idx, img in enumerate(visualizations):
+        out_file = f"visualization_sample_{idx+1}.png"
+        img.save(out_file)
+        print(f"Saved visualization: {out_file}")

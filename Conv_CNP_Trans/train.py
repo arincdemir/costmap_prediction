@@ -31,7 +31,6 @@ def train(config=None):
         num_epochs = wandb.config.num_epochs
         learning_rate = wandb.config.learning_rate
         dataset_size = wandb.config.dataset_size
-        dataset_population_factor = wandb.config.dataset_population_factor
         # Removed early stopping parameters:
         # early_stopping_patience = wandb.config.early_stopping_patience
         # early_stopping_min_delta = wandb.config.early_stopping_min_delta
@@ -46,7 +45,7 @@ def train(config=None):
         grids_tensor = torch.load(data_path)
 
         # Create the dataset and split into train and validation sets
-        dataset = GridDataset(grids_tensor, max_encodings=5, max_queries=5, populate_factor=dataset_population_factor)
+        dataset = GridDataset(grids_tensor, max_encodings=5, max_queries=5)
         train_size = int(0.8 * len(dataset))
         val_size = len(dataset) - train_size
         train_dataset = torch.utils.data.Subset(dataset, range(val_size, len(dataset)))
@@ -201,12 +200,12 @@ if __name__ == "__main__":
         
         # Add other necessary default values (from original training script)
         config.update({
-            'cnn_channels': [32, 64, 128],
-            'encoder_hidden_dims': [256, 256],
-            'latent_dim': 256,
-            'decoder_hidden_dims': [256, 512, 512],
-            'dropout_rate': 0.1,
-            'batch_size': 128,
+            'cnn_channels': [16, 32, 64],
+            'encoder_hidden_dims': [128, 128],
+            'latent_dim': 128,
+            'decoder_hidden_dims': [128, 256, 256],
+            'dropout_rate': 0.2,
+            'batch_size': 32,
             'learning_rate': 0.0013,
             'model_output_name_addition': 'standard_run'
         })

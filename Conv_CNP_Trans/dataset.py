@@ -3,12 +3,11 @@ import torch
 from torch.utils.data import Dataset
 
 class GridDataset(Dataset):
-    def __init__(self, grids_tensor, max_encodings=5, max_queries=5, populate_factor=4):
+    def __init__(self, grids_tensor, max_encodings=5, max_queries=5):
         # grids_tensor shape: [observation_count, steps, grid_size, grid_size]
         self.max_encodings = max_encodings
         self.max_queries = max_queries
         self.inputs = grids_tensor
-        self.populate_factor = populate_factor
         self.grid_size = grids_tensor.shape[2]  # Get grid size from the tensor
         self.input_size = grids_tensor.shape[0]  # the size of the actual dataset
 
@@ -18,7 +17,6 @@ class GridDataset(Dataset):
     
 
     def __getitem__(self, idx):
-        idx = idx % self.input_size
         input_grid = self.inputs[idx]
         num_steps, grid_size, _ = input_grid.shape
         

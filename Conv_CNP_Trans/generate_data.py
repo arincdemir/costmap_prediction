@@ -83,7 +83,7 @@ def simulate(pedestrians: set[Pedestrian], steps: int):
     return visible_grids_tensor, pedestrian_states
 
 if __name__ == "__main__":
-    observation_count = 5120
+    observation_count = 10240
     all_grids = []
     all_pedestrian_states = []
     
