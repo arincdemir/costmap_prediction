@@ -155,7 +155,7 @@ def train(config=None):
             model_path=best_model_path,
             data_path="grids_tensor.pt",
             wandb_run=run,
-            num_samples=3  # Visualize first 3 samples
+            num_samples=5  # Visualize first 5 samples
         )
 
         return avg_val_loss

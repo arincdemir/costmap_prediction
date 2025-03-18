@@ -9,7 +9,7 @@ from PIL import Image
 import wandb
 
 
-def visualize_model_predictions(model, data_tensor, num_samples=3, num_encoding=5, num_query=5):
+def visualize_model_predictions(model, data_tensor, num_samples=5, num_encoding=5, num_query=5):
     """
     Generate visualizations for model predictions on multiple data samples
     
@@ -123,7 +123,7 @@ def visualize_model_predictions(model, data_tensor, num_samples=3, num_encoding=
     return visualizations
 
 
-def log_visualizations_to_wandb(model_path, data_path, wandb_run, num_samples=3):
+def log_visualizations_to_wandb(model_path, data_path, wandb_run, num_samples=5):
     """
     Generate visualizations and log them to wandb
     
