@@ -56,7 +56,7 @@ def simulate_multiple(pedestrians: list, steps: int):
     return grids_tensor, pedestrians_states
 
 if __name__ == "__main__":
-    observation_count = 100
+    observation_count = 10000
     num_pedestrians = 3
     all_grids = []
     all_states = []

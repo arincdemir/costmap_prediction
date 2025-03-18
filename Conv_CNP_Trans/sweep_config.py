@@ -13,28 +13,28 @@ sweep_config = {
             'values': [64]
         },
         'latent_dim': {
-            'values': [256, 394]
+            'values': [394, 512]
         },
         'dropout_rate': {
             'min': 0.11,
-            'max': 0.14
+            'max': 0.15
         },
         'cnn_channels': {
             'values': [
                 [16, 16, 16],
-                [32, 32, 32]
+                [24, 24, 24]
             ]
         },
         'encoder_hidden_dims': {
             'values': [
-                [256, 256, 256],
-                [512, 256, 256],
+                [394, 394],
+                [394, 394, 394],
             ]
         },
         'decoder_hidden_dims': {
             'values': [
-                [256,256,256],
-                [384, 384, 384]
+                [394, 394, 394],
+                [512, 512, 512],
             ]
         },
     }
