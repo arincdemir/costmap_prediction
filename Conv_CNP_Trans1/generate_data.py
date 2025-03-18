@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
     for i in range(observation_count):
         # Spawn pedestrian inside the grid
-        x = random.randint(int(GRID_SIZE * 1/3), int((GRID_SIZE - 1) * 2/3))
-        y = random.randint(int(GRID_SIZE * 1/3), int((GRID_SIZE - 1) * 2/3))
+        x = random.randint(int(GRID_SIZE * 1/4), int((GRID_SIZE - 1) * 3/4))
+        y = random.randint(int(GRID_SIZE * 1/4), int((GRID_SIZE - 1) * 3/4))
         while True:
             xVel = random.randint(-PEDESTRIAN_MAX_VEL, PEDESTRIAN_MAX_VEL)
             yVel = random.randint(-PEDESTRIAN_MAX_VEL, PEDESTRIAN_MAX_VEL)
