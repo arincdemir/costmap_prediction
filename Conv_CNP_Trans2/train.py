@@ -38,7 +38,7 @@ def train(config=None):
         # Use run.id as model output name if not provided in config
         model_output_name_addition = wandb.config.get('model_output_name_addition', run.id)
         
-        device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # Load data generated earlier
         data_path = "grids_tensor.pt"
@@ -200,12 +200,12 @@ if __name__ == "__main__":
         
         # Add other necessary default values (from original training script)
         config.update({
-            'cnn_channels': [16, 16, 16],
-            'encoder_hidden_dims': [256,256],
-            'latent_dim': 128,
-            'decoder_hidden_dims': [128,128,256],
-            'dropout_rate': 0.14,
-            'batch_size': 32,
+            'cnn_channels': [20, 20, 20],
+            'encoder_hidden_dims': [394, 394],
+            'latent_dim': 394,
+            'decoder_hidden_dims': [394, 394, 394],
+            'dropout_rate': 0.125,
+            'batch_size': 64,
             'learning_rate': 0.001,
             'model_output_name_addition': 'standard_run'
         })
