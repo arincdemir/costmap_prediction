@@ -56,8 +56,8 @@ def simulate_multiple(pedestrians: list, steps: int):
     return grids_tensor, pedestrians_states
 
 if __name__ == "__main__":
-    observation_count = 10000
-    num_pedestrians = 3
+    observation_count = 2000
+    num_pedestrians = 2
     all_grids = []
     all_states = []
 
@@ -83,12 +83,12 @@ if __name__ == "__main__":
 
     # Visualize a sample simulation sequence for the first observation.
     plt.figure(figsize=(15, 3))
-    for step in range(10):
+    for step in range(3):
         ax = plt.subplot(1, 10, step + 1)
         ax.imshow(all_grids[0][step], cmap='Greys', interpolation='none')
         rect = patches.Rectangle((0, 0), GRID_SIZE - 1, GRID_SIZE - 1, linewidth=1, edgecolor='red', facecolor='none')
         ax.add_patch(rect)
-        ax.set_title(f"Step {step}")
+        ax.set_title(f"Adım {step}")
         ax.axis("off")
     plt.tight_layout()
     plt.show()
