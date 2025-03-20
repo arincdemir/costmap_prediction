@@ -5,7 +5,7 @@ import random
 import os
 from train import GridDataset
 from Conv_MLP import ConvMLPConv
-from generate_data import GRID_SIZE
+from generate_data import CAPTURED_GRID_SIZE
 
 def load_model(model_path):
     """Load the trained model."""
@@ -89,7 +89,7 @@ def main():
     # Use samples from dataset
     print("Visualizing samples from dataset...")
     try:
-        test_samples = load_test_samples(num_samples=5)
+        test_samples = load_test_samples(num_samples=10)
         
         for i, (input_frames, target_frame) in enumerate(test_samples):
             # Basic visualization

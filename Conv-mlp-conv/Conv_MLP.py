@@ -23,7 +23,7 @@ class ConvMLPConv(nn.Module):
                  input_channels=3,
                  output_channels=1,  # New parameter
                  input_size=32,
-                 dropout_rate=0.2):
+                 dropout_rate=0.25):
         super().__init__()
         
         # Encoder with nn.Sequential
